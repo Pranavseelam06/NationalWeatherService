@@ -27,8 +27,11 @@ legend.addTo(map);
 // Create marker with color-coded icon
 const createMarker = (lat, lon, text, severity="safe") => {
   let iconUrl = "./icons/green-dot.png";
-  if (severity === "severe" || severity === "extreme") iconUrl = "./icons/red-dot.png";
-  else if (severity === "minor" || severity === "moderate") iconUrl = "./icons/yellow-dot.png";
+  if (severity.toLowerCase() === "severe" || severity.toLowerCase() === "extreme") {
+    iconUrl = "./icons/red-dot.png";
+  } else if (severity.toLowerCase() === "minor" || severity.toLowerCase() === "moderate") {
+    iconUrl = "./icons/yellow-dot.png";
+  }
 
   const icon = L.icon({ iconUrl, iconSize: [32,32], iconAnchor:[16,32], popupAnchor:[0,-32] });
   return L.marker([lat, lon], { icon }).addTo(map).bindPopup(text);
@@ -78,7 +81,6 @@ const fetchSafety = async (lat, lon, city, state) => {
     clearMarkers();
 
     let severity = "safe";
-    let extremeAlert = false;
 
     if (data.location_inside_alert && data.active_alerts.length) {
       const highestAlert = data.active_alerts.reduce((prev, curr) => {
@@ -86,7 +88,6 @@ const fetchSafety = async (lat, lon, city, state) => {
         return levels.indexOf(curr.severity.toLowerCase()) > levels.indexOf(prev.severity.toLowerCase()) ? curr : prev;
       }, {severity:"minor"});
       severity = highestAlert.severity.toLowerCase();
-      if (severity === "extreme") extremeAlert = true;
     }
 
     userMarker = createMarker(lat, lon, `You are here: ${city}, ${state}`, severity);
@@ -104,8 +105,8 @@ const fetchSafety = async (lat, lon, city, state) => {
 
     updateSidebar(data.active_alerts);
 
-    // Show extreme button only if needed
-    if (extremeAlert && data.nearest_safe_cities.length) {
+    // ✅ Fix: check severity in lowercase for real alerts
+    if ((severity === "severe" || severity === "extreme") && data.nearest_safe_cities.length) {
       extremeBtn.style.display = "block";
       extremeBtn.onclick = () => {
         const safeCity = data.nearest_safe_cities[0];
