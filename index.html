@@ -8,20 +8,26 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Weather Safety Map</h1>
+  <header>
+    <h1>Weather Safety Dashboard</h1>
+  </header>
 
-  <div id="container">
-    <div id="controls">
-      <button id="checkLocationBtn">Use My Current Location</button>
+  <main id="container">
+    <section id="controls">
+      <button id="checkLocationBtn">📍 Use My Location</button>
       <input type="text" id="cityInput" placeholder="City">
       <input type="text" id="stateInput" placeholder="State">
-      <button id="checkManualBtn">Check Location</button>
-    </div>
+      <button id="checkManualBtn">🔍 Check Location</button>
+    </section>
 
-    <div id="map"></div>
-    <div id="result"></div>
-    <button id="extremeBtn">🚨 Get Directions to Safe City</button>
-  </div>
+    <div id="map-container">
+      <div id="map"></div>
+      <div id="result-container">
+        <div id="result"></div>
+        <button id="extremeBtn">🚨 Get Directions to Safe City</button>
+      </div>
+    </div>
+  </main>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="script.js"></script>
