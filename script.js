@@ -1,14 +1,37 @@
 const BASE_URL = "https://nationalweatherapi.onrender.com";
 const resultDiv = document.getElementById("result");
-const extremeBtn = document.getElementById("extremeBtn");
 
 let map, userMarker, safeMarkers = [], updateInterval;
 
 // Initialize map
-map = L.map('map').setView([28.5383, -81.3792], 10);
+map = L.map('map').setView([28.5383, -81.3792], 10); // Default Orlando
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
+
+// Create floating extreme alert button
+const extremeBtn = L.DomUtil.create('button', 'leaflet-bar');
+extremeBtn.id = 'extremeBtn';
+extremeBtn.textContent = "🚨 Go to Safe City";
+extremeBtn.style.display = "none";
+extremeBtn.style.padding = "8px 12px";
+extremeBtn.style.fontSize = "14px";
+extremeBtn.style.borderRadius = "8px";
+extremeBtn.style.backgroundColor = "#d93025";
+extremeBtn.style.color = "#fff";
+extremeBtn.style.border = "none";
+extremeBtn.style.cursor = "pointer";
+extremeBtn.style.boxShadow = "0 4px 8px rgba(0,0,0,0.2)";
+extremeBtn.onmouseover = () => extremeBtn.style.backgroundColor = "#a71d1d";
+extremeBtn.onmouseout = () => extremeBtn.style.backgroundColor = "#d93025";
+
+const extremeBtnControl = L.control({position: 'topright'});
+extremeBtnControl.onAdd = function(map) {
+  const div = L.DomUtil.create('div');
+  div.appendChild(extremeBtn);
+  return div;
+};
+extremeBtnControl.addTo(map);
 
 // Legend
 const legend = L.control({position: 'bottomright'});
@@ -25,7 +48,7 @@ legend.addTo(map);
 
 // Create marker with color-coded icon
 const createMarker = (lat, lon, text, severity="safe") => {
-  let iconUrl = "./icons/green-dot.png";
+  let iconUrl = "./icons/green-dot.png"; 
   if (severity === "severe" || severity === "extreme") iconUrl = "./icons/red-dot.png";
   else if (severity === "minor" || severity === "moderate") iconUrl = "./icons/yellow-dot.png";
 
@@ -39,7 +62,7 @@ const clearMarkers = () => {
   safeMarkers = [];
 };
 
-// Reverse geocode
+// Reverse geocode to get city/state from coordinates
 const getCityState = async (lat, lon) => {
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
@@ -60,13 +83,12 @@ const fetchSafety = async (lat, lon, city, state) => {
     const data = await res.json();
 
     clearMarkers();
-    extremeBtn.style.display = "none";
 
     let severity = "safe";
     let extremeAlert = false;
     if (data.location_inside_alert && data.active_alerts.length) {
       const highestAlert = data.active_alerts.reduce((prev, curr) => {
-        const levels = ["minor","moderate","severe","extreme"];
+        const levels = ["minor", "moderate", "severe", "extreme"];
         return levels.indexOf(curr.severity.toLowerCase()) > levels.indexOf(prev.severity.toLowerCase()) ? curr : prev;
       }, { severity: "minor" });
       severity = highestAlert.severity.toLowerCase();
@@ -93,14 +115,16 @@ const fetchSafety = async (lat, lon, city, state) => {
 
     resultDiv.textContent = text;
 
-    // Show Extreme button only if extreme alert exists
+    // Show/hide floating extreme alert button
     if (extremeAlert && data.nearest_safe_cities.length) {
-      extremeBtn.style.display = "inline-block";
+      extremeBtn.style.display = "block";
       extremeBtn.onclick = () => {
         const safeCity = data.nearest_safe_cities[0];
         const url = `https://www.google.com/maps/dir/?api=1&origin=${lat},${lon}&destination=${safeCity.lat},${safeCity.lon}&travelmode=driving`;
         window.open(url, "_blank");
       };
+    } else {
+      extremeBtn.style.display = "none";
     }
 
   } catch (err) {
