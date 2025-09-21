@@ -1,10 +1,11 @@
 const BASE_URL = "https://nationalweatherapi.onrender.com";
 const resultDiv = document.getElementById("result");
+const extremeBtn = document.getElementById("extremeBtn");
 
 let map, userMarker, safeMarkers = [], updateInterval;
 
 // Initialize map
-map = L.map('map').setView([28.5383, -81.3792], 10); // Default Orlando
+map = L.map('map').setView([28.5383, -81.3792], 10);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
@@ -24,7 +25,7 @@ legend.addTo(map);
 
 // Create marker with color-coded icon
 const createMarker = (lat, lon, text, severity="safe") => {
-  let iconUrl = "./icons/green-dot.png"; // default safe
+  let iconUrl = "./icons/green-dot.png";
   if (severity === "severe" || severity === "extreme") iconUrl = "./icons/red-dot.png";
   else if (severity === "minor" || severity === "moderate") iconUrl = "./icons/yellow-dot.png";
 
@@ -38,7 +39,7 @@ const clearMarkers = () => {
   safeMarkers = [];
 };
 
-// Reverse geocode to get city/state from coordinates
+// Reverse geocode
 const getCityState = async (lat, lon) => {
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
@@ -59,14 +60,17 @@ const fetchSafety = async (lat, lon, city, state) => {
     const data = await res.json();
 
     clearMarkers();
+    extremeBtn.style.display = "none";
 
     let severity = "safe";
+    let extremeAlert = false;
     if (data.location_inside_alert && data.active_alerts.length) {
       const highestAlert = data.active_alerts.reduce((prev, curr) => {
-        const levels = ["minor", "moderate", "severe", "extreme"];
+        const levels = ["minor","moderate","severe","extreme"];
         return levels.indexOf(curr.severity.toLowerCase()) > levels.indexOf(prev.severity.toLowerCase()) ? curr : prev;
       }, { severity: "minor" });
       severity = highestAlert.severity.toLowerCase();
+      if (severity === "extreme") extremeAlert = true;
     }
 
     userMarker = createMarker(lat, lon, `You are here: ${city}, ${state}`, severity);
@@ -88,6 +92,16 @@ const fetchSafety = async (lat, lon, city, state) => {
     }
 
     resultDiv.textContent = text;
+
+    // Show Extreme button only if extreme alert exists
+    if (extremeAlert && data.nearest_safe_cities.length) {
+      extremeBtn.style.display = "inline-block";
+      extremeBtn.onclick = () => {
+        const safeCity = data.nearest_safe_cities[0];
+        const url = `https://www.google.com/maps/dir/?api=1&origin=${lat},${lon}&destination=${safeCity.lat},${safeCity.lon}&travelmode=driving`;
+        window.open(url, "_blank");
+      };
+    }
 
   } catch (err) {
     resultDiv.textContent = "❌ Could not fetch data. See console.";
