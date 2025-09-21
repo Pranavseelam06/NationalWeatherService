@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Weather Safety Map</title>
+  <title>Weather Safety Dashboard</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
@@ -20,11 +20,17 @@
       <button id="checkManualBtn">🔍 Check Location</button>
     </section>
 
-    <div id="map-container">
-      <div id="map"></div>
-      <div id="result-container">
-        <div id="result"></div>
-        <button id="extremeBtn">🚨 Get Directions to Safe City</button>
+    <div id="map-wrapper">
+      <aside id="sidebar">
+        <h2>Active Alerts</h2>
+        <div id="alertsList">No alerts yet</div>
+      </aside>
+      <div id="map-container">
+        <div id="map"></div>
+        <div id="result-container">
+          <div id="result"></div>
+          <button id="extremeBtn">🚨 Get Directions to Safe City</button>
+        </div>
       </div>
     </div>
   </main>

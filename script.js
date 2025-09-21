@@ -1,5 +1,7 @@
 const BASE_URL = "https://nationalweatherapi.onrender.com";
 const resultDiv = document.getElementById("result");
+const alertsList = document.getElementById("alertsList");
+const extremeBtn = document.getElementById("extremeBtn");
 
 let map, userMarker, safeMarkers = [], updateInterval;
 
@@ -8,30 +10,6 @@ map = L.map('map').setView([28.5383, -81.3792], 10); // Default Orlando
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
-
-// Create floating extreme alert button
-const extremeBtn = L.DomUtil.create('button', 'leaflet-bar');
-extremeBtn.id = 'extremeBtn';
-extremeBtn.textContent = "🚨 Go to Safe City";
-extremeBtn.style.display = "none";
-extremeBtn.style.padding = "8px 12px";
-extremeBtn.style.fontSize = "14px";
-extremeBtn.style.borderRadius = "8px";
-extremeBtn.style.backgroundColor = "#d93025";
-extremeBtn.style.color = "#fff";
-extremeBtn.style.border = "none";
-extremeBtn.style.cursor = "pointer";
-extremeBtn.style.boxShadow = "0 4px 8px rgba(0,0,0,0.2)";
-extremeBtn.onmouseover = () => extremeBtn.style.backgroundColor = "#a71d1d";
-extremeBtn.onmouseout = () => extremeBtn.style.backgroundColor = "#d93025";
-
-const extremeBtnControl = L.control({position: 'topright'});
-extremeBtnControl.onAdd = function(map) {
-  const div = L.DomUtil.create('div');
-  div.appendChild(extremeBtn);
-  return div;
-};
-extremeBtnControl.addTo(map);
 
 // Legend
 const legend = L.control({position: 'bottomright'});
@@ -48,7 +26,7 @@ legend.addTo(map);
 
 // Create marker with color-coded icon
 const createMarker = (lat, lon, text, severity="safe") => {
-  let iconUrl = "./icons/green-dot.png"; 
+  let iconUrl = "./icons/green-dot.png";
   if (severity === "severe" || severity === "extreme") iconUrl = "./icons/red-dot.png";
   else if (severity === "minor" || severity === "moderate") iconUrl = "./icons/yellow-dot.png";
 
@@ -62,7 +40,7 @@ const clearMarkers = () => {
   safeMarkers = [];
 };
 
-// Reverse geocode to get city/state from coordinates
+// Reverse geocode
 const getCityState = async (lat, lon) => {
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
@@ -73,6 +51,21 @@ const getCityState = async (lat, lon) => {
   } catch {
     return { city:null, state:null };
   }
+};
+
+// Update sidebar with alerts
+const updateSidebar = (alerts) => {
+  alertsList.innerHTML = "";
+  if (!alerts.length) {
+    alertsList.textContent = "No active alerts!";
+    return;
+  }
+  alerts.forEach(a => {
+    const div = document.createElement("div");
+    div.className = `alert-item ${a.severity.toLowerCase()}`;
+    div.textContent = `${a.type} - ${a.severity}`;
+    alertsList.appendChild(div);
+  });
 };
 
 // Fetch safety info
@@ -86,11 +79,12 @@ const fetchSafety = async (lat, lon, city, state) => {
 
     let severity = "safe";
     let extremeAlert = false;
+
     if (data.location_inside_alert && data.active_alerts.length) {
       const highestAlert = data.active_alerts.reduce((prev, curr) => {
-        const levels = ["minor", "moderate", "severe", "extreme"];
+        const levels = ["minor","moderate","severe","extreme"];
         return levels.indexOf(curr.severity.toLowerCase()) > levels.indexOf(prev.severity.toLowerCase()) ? curr : prev;
-      }, { severity: "minor" });
+      }, {severity:"minor"});
       severity = highestAlert.severity.toLowerCase();
       if (severity === "extreme") extremeAlert = true;
     }
@@ -105,17 +99,12 @@ const fetchSafety = async (lat, lon, city, state) => {
 
     map.fitBounds(allLatLngs, { padding: [50,50] });
 
-    let text = data.location_inside_alert 
-      ? `⚠️ You are in an alert zone!\nActive Alerts:\n${data.active_alerts.map(a=>`${a.type} - ${a.severity}`).join("\n")}`
-      : "✅ Your location is safe!";
+    // Show only general safety status
+    resultDiv.textContent = data.location_inside_alert ? "⚠️ You are in an alert zone!" : "✅ Your location is safe!";
 
-    if (data.nearest_safe_cities.length) {
-      text += `\n\nNearest Safe Cities:\n${data.nearest_safe_cities.map(c=>`${c.name} - ${c.distance_km} km`).join("\n")}`;
-    }
+    updateSidebar(data.active_alerts);
 
-    resultDiv.textContent = text;
-
-    // Show/hide floating extreme alert button
+    // Show extreme button only if needed
     if (extremeAlert && data.nearest_safe_cities.length) {
       extremeBtn.style.display = "block";
       extremeBtn.onclick = () => {
@@ -156,7 +145,7 @@ const checkLocation = async () => {
   });
 };
 
-// Manual city/state input
+// Manual input
 const checkManual = async () => {
   const city = document.getElementById("cityInput").value.trim();
   const state = document.getElementById("stateInput").value.trim();
