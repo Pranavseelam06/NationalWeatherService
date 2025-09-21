@@ -172,6 +172,9 @@ h1 {
   background: #2b3b5c;
   color: #e0e0e0;
 }
+.dark-mode .info.legend {
+  color: #000000; /* black text */
+}
 
 .dark-mode #sidebar {
   background: #2b3b5c;
