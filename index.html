@@ -2,32 +2,117 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Disaster Safety Checker</title>
-
-  <!-- Leaflet CSS -->
+  <title>Weather Safety Map</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <link rel="stylesheet" href="style.css">
+  <!-- Google Fonts: Poppins -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #ffe6e6, #fff0f5);
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      padding: 20px 0 10px 0;
+      color: #800000;
+      font-weight: 600;
+    }
+
+    #container {
+      max-width: 900px;
+      margin: auto;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    #controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 15px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #controls input {
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      flex: 1 1 120px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 400;
+    }
+
+    #controls button {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 10px;
+      background-color: #ff6666;
+      color: white;
+      cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+
+    #controls button:hover {
+      background-color: #cc0000;
+    }
+
+    #map { 
+      height: 500px; 
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    #result {
+      white-space: pre-line;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 400;
+      padding: 12px;
+      background: #fff0f5;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .info.legend img { 
+      vertical-align: middle; 
+      margin-right: 4px; 
+    }
+
+    @media (max-width: 600px) {
+      #controls {
+        flex-direction: column;
+      }
+      #controls input, #controls button {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>Disaster Safety Checker</h1>
+  <h1>Weather Safety Map</h1>
 
-  <section>
-    <h2>Automatic Location</h2>
-    <button id="checkLocationBtn">Check My Location Safety</button>
-  </section>
+  <div id="container">
+    <div id="controls">
+      <button id="checkLocationBtn">Use My Current Location</button>
+      <input type="text" id="cityInput" placeholder="City">
+      <input type="text" id="stateInput" placeholder="State">
+      <button id="checkManualBtn">Check Location</button>
+    </div>
 
-  <section>
-    <h2>Or Enter City and State</h2>
-    <input type="text" id="cityInput" placeholder="City e.g., Orlando">
-    <input type="text" id="stateInput" placeholder="State e.g., FL">
-    <button id="checkManualBtn">Check Safety</button>
-  </section>
+    <div id="map"></div>
+    <div id="result"></div>
+  </div>
 
-  <div id="result">Click a button to check your safety.</div>
-  <div id="map"></div>
-
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="script.js"></script>
 </body>
