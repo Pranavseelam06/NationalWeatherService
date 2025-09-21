@@ -13,7 +13,7 @@ h1 {
 }
 
 #container {
-  max-width: 1100px;
+  max-width: 1000px;
   margin: auto;
   padding: 20px;
   background: rgba(255, 255, 255, 0.95);
@@ -35,6 +35,8 @@ h1 {
   border-radius: 10px;
   border: 1px solid #ccc;
   flex: 1 1 120px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400;
 }
 
 #controls button {
@@ -44,6 +46,7 @@ h1 {
   background-color: #ff6666;
   color: white;
   cursor: pointer;
+  font-family: 'Poppins', sans-serif;
   font-weight: 500;
   transition: 0.3s;
 }
@@ -52,38 +55,59 @@ h1 {
   background-color: #cc0000;
 }
 
-#main-content {
+#mainContent {
   display: flex;
-  gap: 20px;
   flex-wrap: wrap;
+  gap: 20px;
 }
 
-#map { 
-  flex: 1 1 600px;
-  height: 500px; 
+#map {
+  flex: 2 1 600px;
+  height: 500px;
   border-radius: 12px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-#alerts-sidebar {
-  width: 300px;
-  max-height: 500px;
-  overflow-y: auto;
-  background: rgba(255,255,255,0.95);
+#sidebar {
+  flex: 1 1 300px;
+  background: #fff0f5;
   padding: 15px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  font-family: 'Poppins', sans-serif;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
+}
+
+#result {
+  font-weight: 500;
+  padding: 10px;
+  background: #ffe6e6;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 15px;
 }
 
 #alertsList {
-  flex-grow: 1;
-  white-space: pre-line;
-  font-weight: 400;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
 }
+
+.alert-item {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 500;
+  color: white;
+  font-size: 14px;
+}
+
+.alert-item.minor { background-color: #f5c542; color: #000; }
+.alert-item.moderate { background-color: #f5a742; color: #000; }
+.alert-item.severe { background-color: #e54a42; }
+.alert-item.extreme { background-color: #c70039; }
 
 #extremeBtn {
   display: none;
@@ -102,39 +126,18 @@ h1 {
   background-color: #a71d1d;
 }
 
-#result {
-  margin-top: 20px;
-  white-space: pre-line;
-  padding: 12px;
-  background: #fff0f5;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
+/* Legend images */
 .info.legend img { 
   vertical-align: middle; 
   margin-right: 4px; 
 }
 
+/* Responsive */
 @media (max-width: 900px) {
-  #main-content {
+  #mainContent {
     flex-direction: column;
   }
-
-  #alerts-sidebar {
-    width: 100%;
-  }
-
-  #map {
-    width: 100%;
-  }
-}
-
-@media (max-width: 600px) {
-  #controls {
-    flex-direction: column;
-  }
-  #controls input, #controls button {
-    width: 100%;
+  #map, #sidebar {
+    flex: 1 1 100%;
   }
 }
